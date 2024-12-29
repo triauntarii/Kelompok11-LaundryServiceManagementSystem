@@ -1,3 +1,3 @@
 # Kelompok11-LaundryServiceManagementSystem(LSMS)
-Anggota Kelompok : Aprillino Wicaksono (24110400024), Maria Devi Aprilia (24110400032), Tria Untari Sasmito (24110400015), Willy Alfalfa Suwarno (24110400021)
+Anggota Kelompok : Aprillino Wicaksono (24110400024), Maria Devi Aprilia (24110400032), Tria Untari Sasmito (24110400015), Willy Alfalfa Suwarno (24110400021).
 Laundry Service Management System (LSMS) adalah sebuah aplikasi berbasis konsol yang dirancang untuk mengelola operasional bisnis laundry. Sistem ini menyediakan fitur utama seperti pencatatan pesanan, pembayaran, pengelolaan status pesanan, hingga laporan statistik seperti pendapatan harian, jumlah pesanan harian, dan layanan yang paling sering dipesan. Sistem ini ditujukan untuk memudahkan pemilik usaha laundry dalam memantau pesanan secara efisien, mengelola komplain pelanggan, serta meningkatkan layanan pelanggan.
