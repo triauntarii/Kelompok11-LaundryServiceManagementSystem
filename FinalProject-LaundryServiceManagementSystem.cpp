@@ -1,34 +1,31 @@
 #include <iostream>
 #include <string>
-#include <vector>
-#include <map>
+#include <iomanip>
 
 using namespace std;
 
-// untuk Menyimpan Informasi Pelanggan dan Pesanan
-struct Pelanggan
-{
-    string nama;
-    string noTelp;
-    string jenisLayanan; // regular atau express
-    float jumlahKg; // jumlah kilogram
-    bool statusPembayaran; // true jika sudah bayar, false jika belum
-    int biaya;
-    int estimasiWaktu; // dalam hari
-    string catatanKhusus; // catatan khusus pelanggan
-    string statusPesanan; // status pesanan (terima/proses/selesai)
-    string uuid; // UUID Pelanggan
-};
+const int MAX_PELANGGAN = 100;
+const int MAX_KOMPLAIN = 50;
 
-// untuk Menyimpan Catatan Komplain Pelanggan
-struct Komplain
-{
-    string namaPelanggan;
-    string noTelp;
-    string deskripsiKomplain;
-};
+// Data pelanggan
+string namaPelanggan[MAX_PELANGGAN];
+string noTelpPelanggan[MAX_PELANGGAN];
+string jenisLayanan[MAX_PELANGGAN];
+float jumlahKg[MAX_PELANGGAN];
+bool statusPembayaran[MAX_PELANGGAN];
+int biaya[MAX_PELANGGAN];
+int estimasiWaktu[MAX_PELANGGAN];
+string catatanKhusus[MAX_PELANGGAN];
+string statusPesanan[MAX_PELANGGAN];
+string uuidPelanggan[MAX_PELANGGAN];
+int jumlahPelanggan = 0;
 
-// untuk Membuat UUID(kode unik pelanggan) dari 3 karakter awal nama dan 3 Digit Terakhir No. Telp pelanggan
+// Data komplain
+string namaKomplain[MAX_KOMPLAIN];
+string noTelpKomplain[MAX_KOMPLAIN];
+string deskripsiKomplain[MAX_KOMPLAIN];
+int jumlahKomplain = 0;
+
 string buatUUID(const string& nama, const string& noTelp)
 {
     string inisial = nama.substr(0, 3);
@@ -36,235 +33,256 @@ string buatUUID(const string& nama, const string& noTelp)
     return inisial + tigaDigitTerakhir;
 }
 
-// untuk Menangani Proses Penerimaan Pesanan
-void terimaPesanan(vector<Pelanggan>& daftarPesanan)
+void tampilkanDaftarPesanan()
 {
-    Pelanggan pelangganBaru;
+    cout << "\nDaftar Pesanan:" << endl;
+    cout << setw(5) << "No." << setw(15) << "UUID" << setw(20) << "Nama" 
+         << setw(15) << "Status" << setw(15) << "Pembayaran" << endl;
+    cout << string(70, '-') << endl;
+    
+    for (int i = 0; i < jumlahPelanggan; i++)
+    {
+        cout << setw(5) << (i + 1) 
+             << setw(15) << uuidPelanggan[i]
+             << setw(20) << namaPelanggan[i]
+             << setw(15) << statusPesanan[i]
+             << setw(15) << (statusPembayaran[i] ? "Lunas" : "Belum") << endl;
+    }
+    cout << endl;
+}
+
+void terimaPesanan()
+{
+    if (jumlahPelanggan >= MAX_PELANGGAN)
+    {
+        cout << "Tidak dapat menerima lebih banyak pesanan!" << endl;
+        return;
+    }
+
     cout << "Masukkan Nama Pelanggan: ";
-    getline(cin, pelangganBaru.nama);
+    getline(cin, namaPelanggan[jumlahPelanggan]);
     cout << "Masukkan Nomor Telepon Pelanggan: ";
-    getline(cin, pelangganBaru.noTelp);
-    cout << "Masukkan Jenis Layanan (regular/express): ";
-    getline(cin, pelangganBaru.jenisLayanan);
+    getline(cin, noTelpPelanggan[jumlahPelanggan]);
+    
+    // Pilihan jenis layanan dengan nomor
+    cout << "\nPilih Jenis Layanan:" << endl;
+    cout << "1. Regular (Rp 6.000/kg - 3 hari)" << endl;
+    cout << "2. Express (Rp 10.000/kg - 1 hari)" << endl;
+    cout << "Pilihan (1/2): ";
+    
+    int pilihanLayanan;
+    cin >> pilihanLayanan;
+    cin.ignore();
+    
+    if (pilihanLayanan == 1)
+    {
+        jenisLayanan[jumlahPelanggan] = "regular";
+        biaya[jumlahPelanggan] = jumlahKg[jumlahPelanggan] * 6000;
+        estimasiWaktu[jumlahPelanggan] = 3;
+    } else if (pilihanLayanan == 2)
+    {
+        jenisLayanan[jumlahPelanggan] = "express";
+        biaya[jumlahPelanggan] = jumlahKg[jumlahPelanggan] * 10000;
+        estimasiWaktu[jumlahPelanggan] = 1;
+    } else
+    {
+        cout << "Pilihan tidak valid! Menggunakan layanan regular sebagai default." << endl;
+        jenisLayanan[jumlahPelanggan] = "regular";
+        biaya[jumlahPelanggan] = jumlahKg[jumlahPelanggan] * 6000;
+        estimasiWaktu[jumlahPelanggan] = 3;
+    }
+
     cout << "Masukkan Jumlah Kilogram: ";
-    cin >> pelangganBaru.jumlahKg;
+    cin >> jumlahKg[jumlahPelanggan];
     cin.ignore();
+    
     cout << "Masukkan Catatan Khusus: ";
-    getline(cin, pelangganBaru.catatanKhusus);
+    getline(cin, catatanKhusus[jumlahPelanggan]);
 
-    // hitung biaya dan estimasi waktu
-    if (pelangganBaru.jenisLayanan == "regular")
-    {
-        pelangganBaru.biaya = pelangganBaru.jumlahKg * 6000;
-        pelangganBaru.estimasiWaktu = 3;
-    }
-    else if (pelangganBaru.jenisLayanan == "express")
-    {
-        pelangganBaru.biaya = pelangganBaru.jumlahKg * 10000;
-        pelangganBaru.estimasiWaktu = 1;
-    }
+    // Buat UUID dan set status awal
+    uuidPelanggan[jumlahPelanggan] = buatUUID(namaPelanggan[jumlahPelanggan], noTelpPelanggan[jumlahPelanggan]);
+    statusPesanan[jumlahPelanggan] = "terima";
+    statusPembayaran[jumlahPelanggan] = false;
 
-    // Membuat UUID dengan 3 huruf awal nama dan 3 Digit Terakhir No. Telp pelanggan
-    pelangganBaru.uuid = buatUUID(pelangganBaru.nama, pelangganBaru.noTelp);
+    // Tampilkan ringkasan pesanan
+    cout << "\nRingkasan Pesanan:" << endl;
+    cout << "UUID: " << uuidPelanggan[jumlahPelanggan] << endl;
+    cout << "Nama: " << namaPelanggan[jumlahPelanggan] << endl;
+    cout << "Layanan: " << jenisLayanan[jumlahPelanggan] << endl;
+    cout << "Biaya: Rp " << biaya[jumlahPelanggan] << endl;
+    cout << "Estimasi Selesai: " << estimasiWaktu[jumlahPelanggan] << " hari" << endl;
 
-    // Status awal pesanan
-    pelangganBaru.statusPesanan = "terima";
-
-    daftarPesanan.push_back(pelangganBaru);
-    cout << "Pesanan berhasil diterima!" << endl;
+    jumlahPelanggan++;
 }
 
-// untuk Menangani Pembayaran
-void lakukan_pembayaran(vector<Pelanggan>& daftarPesanan)
+void lakukanPembayaran()
 {
-    string uuid;
-    cout << "Masukkan UUID Pelanggan untuk Pembayaran: ";
-    cin >> uuid;
+    if (jumlahPelanggan == 0)
+    {
+        cout << "Belum ada pesanan yang tercatat." << endl;
+        return;
+    }
+
+    tampilkanDaftarPesanan();
+    
+    cout << "Pilih nomor pesanan (1-" << jumlahPelanggan << "): ";
+    int pilihan;
+    cin >> pilihan;
     cin.ignore();
-    bool ditemukan = false;
-
-    for (auto& pelanggan : daftarPesanan)
+    
+    if (pilihan < 1 || pilihan > jumlahPelanggan)
     {
-        if (pelanggan.uuid == uuid) {
-            pelanggan.statusPembayaran = true;
-            cout << "Pembayaran untuk " << pelanggan.nama << " telah diterima. Total biaya: " << pelanggan.biaya << endl;
-            cout << "\n========= Nota Pembayaran =========" << endl;
-            cout << "Nama Pelanggan: " << pelanggan.nama << endl;
-            cout << "UUID: " << pelanggan.uuid << endl;
-            cout << "Jenis Layanan: " << pelanggan.jenisLayanan << endl;
-            cout << "Jumlah Kilogram: " << pelanggan.jumlahKg << " kg" << endl;
-            cout << "Total Biaya: " << pelanggan.biaya << endl;
-            cout << "Estimasi Waktu: " << pelanggan.estimasiWaktu << " hari" << endl;
-            cout << "Status Pembayaran: " << (pelanggan.statusPembayaran ? "Sudah Dibayar" : "Belum Dibayar") << endl;
-            cout << "Catatan Khusus: " << pelanggan.catatanKhusus << endl;
-            cout << "===================================" << endl;
-            ditemukan = true;
-            break;
-        }
+        cout << "Nomor pesanan tidak valid!" << endl;
+        return;
     }
-
-    if (!ditemukan)
+    
+    int index = pilihan - 1;
+    if (statusPembayaran[index])
     {
-        cout << "Pesanan tidak ditemukan!" << endl;
+        cout << "Pesanan ini sudah dibayar!" << endl;
+        return;
     }
+    
+    statusPembayaran[index] = true;
+    cout << "Pembayaran untuk " << namaPelanggan[index] << " telah diterima." << endl;
+    cout << "Total biaya: Rp " << biaya[index] << endl;
 }
 
-// untuk update Status Pesanan
-void updateStatusPesanan(vector<Pelanggan>& daftarPesanan)
+void updateStatusPesanan()
 {
-    string uuid;
-    cout << "Masukkan UUID Pelanggan untuk update status: ";
-    cin >> uuid;
+    if (jumlahPelanggan == 0)
+    {
+        cout << "Belum ada pesanan yang tercatat." << endl;
+        return;
+    }
+
+    tampilkanDaftarPesanan();
+    
+    cout << "Pilih nomor pesanan (1-" << jumlahPelanggan << "): ";
+    int pilihan;
+    cin >> pilihan;
     cin.ignore();
-    bool ditemukan = false;
-
-    for (auto& pelanggan : daftarPesanan)
+    
+    if (pilihan < 1 || pilihan > jumlahPelanggan)
     {
-        if (pelanggan.uuid == uuid)
+        cout << "Nomor pesanan tidak valid!" << endl;
+        return;
+    }
+    
+    int index = pilihan - 1;
+    cout << "Status saat ini: " << statusPesanan[index] << endl;
+    cout << "\nPilih status baru:" << endl;
+    cout << "1. Terima" << endl;
+    cout << "2. Proses" << endl;
+    cout << "3. Selesai" << endl;
+    cout << "Pilihan (1-3): ";
+    
+    int statusPilihan;
+    cin >> statusPilihan;
+    cin.ignore();
+    
+    string statusBaru;
+    switch (statusPilihan)
+    {
+        case 1: statusBaru = "terima"; break;
+        case 2: statusBaru = "proses"; break;
+        case 3: statusBaru = "selesai"; break;
+        default:
+            cout << "Pilihan tidak valid!" << endl;
+            return;
+    }
+    
+    statusPesanan[index] = statusBaru;
+    cout << "Status pesanan " << namaPelanggan[index] << " telah diperbarui ke " << statusBaru << endl;
+}
+
+void tampilkanPesananAktif()
+{
+    cout << "\nDaftar Pesanan Aktif:" << endl;
+    cout << setw(5) << "No." << setw(15) << "UUID" << setw(20) << "Nama" 
+         << setw(15) << "Status" << setw(15) << "Pembayaran" << endl;
+    cout << string(70, '-') << endl;
+    
+    int count = 0;
+    for (int i = 0; i < jumlahPelanggan; i++)
+    {
+        if (statusPesanan[i] != "selesai")
         {
-            cout << "Status saat ini: " << pelanggan.statusPesanan << endl;
-            cout << "Pilih status baru (terima/proses/selesai): ";
-            string statusBaru;
-            cin >> statusBaru;
-            if (statusBaru == "terima" || statusBaru == "proses" || statusBaru == "selesai")
-            {
-                pelanggan.statusPesanan = statusBaru;
-                cout << "Status pesanan " << pelanggan.nama << " telah diperbarui ke " << pelanggan.statusPesanan << endl;
-            }
-            else
-            {
-                cout << "Status tidak valid!" << endl;
-            }
-            ditemukan = true;
-            break;
+            count++;
+            cout << setw(5) << count 
+                 << setw(15) << uuidPelanggan[i]
+                 << setw(20) << namaPelanggan[i]
+                 << setw(15) << statusPesanan[i]
+                 << setw(15) << (statusPembayaran[i] ? "Lunas" : "Belum") << endl;
         }
     }
-
-    if (!ditemukan)
+    
+    if (count == 0)
     {
-        cout << "Pesanan tidak ditemukan!" << endl;
+        cout << "Tidak ada pesanan aktif saat ini." << endl;
     }
+    cout << endl;
 }
 
-// untuk Menampilkan Daftar Pesanan Aktif
-void tampilkanPesananAktif(const vector<Pelanggan>& daftarPesanan)
+void terimaKomplain()
 {
-    cout << "Daftar Pesanan Aktif:" << endl;
-    for (const auto& pelanggan : daftarPesanan)
+    if (jumlahKomplain >= MAX_KOMPLAIN)
     {
-        if (pelanggan.statusPesanan != "selesai")
-        {
-            cout << "UUID: " << pelanggan.uuid << " | Nama: " << pelanggan.nama << " | Status: " << pelanggan.statusPesanan << endl;
-        }
+        cout << "Tidak dapat menerima lebih banyak komplain!" << endl;
+        return;
     }
-}
 
-// untuk Menghitung Jumlah Pesanan Harian
-void tampilkanJumlahPesananHarian(const vector<Pelanggan>& daftarPesanan)
-{
-    map<string, int> pesananCount;
-    for (const auto& pelanggan : daftarPesanan)
-    {
-        if (pelanggan.statusPembayaran && pelanggan.statusPesanan != "selesai")
-        {
-            pesananCount[pelanggan.statusPesanan]++;
-        }
-    }
-    cout << "Jumlah Pesanan Harian (Belum Selesai):" << endl;
-    for (const auto& pair : pesananCount)
-    {
-        cout << pair.first << ": " << pair.second << " pesanan" << endl;
-    }
-}
-
-// untuk Menampilkan Catatan Komplain
-void tampilkanKomplain(const vector<Komplain>& daftarKomplain)
-{
-    cout << "Daftar Komplain Pelanggan:" << endl;
-    for (const auto& komplain : daftarKomplain)
-    {
-        cout << "Nama Pelanggan: " << komplain.namaPelanggan << endl;
-        cout << "Nomor Telepon: " << komplain.noTelp << endl;
-        cout << "Deskripsi Komplain: " << komplain.deskripsiKomplain << endl;
-        cout << "---" << endl;
-    }
-}
-
-// untuk Menerima Komplain
-void terimaKomplain(vector<Komplain>& daftarKomplain)
-{
-    Komplain komplainBaru;
     cout << "Masukkan Nama Pelanggan: ";
-    getline(cin, komplainBaru.namaPelanggan);
+    getline(cin, namaKomplain[jumlahKomplain]);
     cout << "Masukkan Nomor Telepon Pelanggan: ";
-    getline(cin, komplainBaru.noTelp);
+    getline(cin, noTelpKomplain[jumlahKomplain]);
     cout << "Masukkan Deskripsi Komplain: ";
-    getline(cin, komplainBaru.deskripsiKomplain);
-    daftarKomplain.push_back(komplainBaru);
+    getline(cin, deskripsiKomplain[jumlahKomplain]);
+
     cout << "Komplain berhasil diterima!" << endl;
+    jumlahKomplain++;
 }
 
-// untuk Melihat Total Pendapatan Harian
-void tampilkanPendapatanHarian(const vector<Pelanggan>& daftarPesanan)
+void tampilkanKomplain()
 {
-    int totalPendapatan = 0;
-    for (const auto& pelanggan : daftarPesanan)
+    if (jumlahKomplain == 0)
     {
-        if (pelanggan.statusPembayaran)
-        {
-            totalPendapatan += pelanggan.biaya;
-        }
-    }
-    cout << "Total Pendapatan Harian: " << totalPendapatan << endl;
-}
-
-// untuk Menampilkan Layanan Paling Sering Dipesan
-void tampilkanLayananPalingSeringDipesan(const vector<Pelanggan>& daftarPesanan)
-{
-    map<string, int> layananCount;
-    for (const auto& pelanggan : daftarPesanan)
-    {
-        if (pelanggan.statusPembayaran)
-        {
-            layananCount[pelanggan.jenisLayanan]++;
-        }
+        cout << "Belum ada komplain yang tercatat." << endl;
+        return;
     }
 
-    string layananPalingSering;
-    int maxCount = 0;
-
-    for (const auto& pair : layananCount)
+    cout << "\nDaftar Komplain Pelanggan:" << endl;
+    cout << setw(5) << "No." << setw(20) << "Nama" 
+         << setw(15) << "No. Telp" << setw(30) << "Deskripsi" << endl;
+    cout << string(70, '-') << endl;
+    
+    for (int i = 0; i < jumlahKomplain; i++)
     {
-        if (pair.second > maxCount)
-        {
-            maxCount = pair.second;
-            layananPalingSering = pair.first;
-        }
+        cout << setw(5) << (i + 1)
+             << setw(20) << namaKomplain[i]
+             << setw(15) << noTelpKomplain[i]
+             << setw(30) << deskripsiKomplain[i] << endl;
     }
-
-    cout << "Layanan Paling Sering Dipesan: " << layananPalingSering << endl;
+    cout << endl;
 }
 
 int main()
 {
-    vector<Pelanggan> daftarPesanan;
-    vector<Komplain> daftarKomplain;
-
     while (true)
     {
-        cout << "=== Laundry Service Management System (LSMS) ===" << endl;
+        cout << string(50, '=') << endl;
+        cout << "   Laundry Service Management System (LSMS)" << endl;
+        cout << string(50, '=') << endl;
         cout << "Menu:" << endl;
         cout << "1. Terima Pesanan" << endl;
         cout << "2. Lakukan Pembayaran" << endl;
         cout << "3. Update Status Pesanan" << endl;
         cout << "4. Tampilkan Daftar Pesanan Aktif" << endl;
-        cout << "5. Tampilkan Jumlah Pesanan Harian" << endl; // Menu baru untuk jumlah pesanan harian
-        cout << "6. Terima Komplain" << endl;
-        cout << "7. Tampilkan Daftar Komplain" << endl;
-        cout << "8. Tampilkan Total Pendapatan Harian" << endl;
-        cout << "9. Tampilkan Layanan Paling Sering Dipesan" << endl;
-        cout << "10. Keluar" << endl;
-        cout << "Pilih opsi (1-10): ";
+        cout << "5. Terima Komplain" << endl;
+        cout << "6. Tampilkan Daftar Komplain" << endl;
+        cout << "7. Keluar" << endl;
+        cout << string(50, '-') << endl;
+        cout << "Pilih opsi (1-7): ";
 
         int pilihan;
         cin >> pilihan;
@@ -272,39 +290,17 @@ int main()
 
         switch (pilihan)
         {
-        case 1:
-            terimaPesanan(daftarPesanan);
-            break;
-        case 2:
-            lakukan_pembayaran(daftarPesanan);
-            break;
-        case 3:
-            updateStatusPesanan(daftarPesanan);
-            break;
-        case 4:
-            tampilkanPesananAktif(daftarPesanan);
-            break;
-        case 5:
-            tampilkanJumlahPesananHarian(daftarPesanan); // Menampilkan jumlah pesanan harian
-            break;
-        case 6:
-            terimaKomplain(daftarKomplain);
-            break;
-        case 7:
-            tampilkanKomplain(daftarKomplain);
-            break;
-        case 8:
-            tampilkanPendapatanHarian(daftarPesanan);
-            break;
-        case 9:
-            tampilkanLayananPalingSeringDipesan(daftarPesanan);
-            break;
-        case 10:
-            cout << "Keluar dari program." << endl;
-            return 0;
-        default:
-            cout << "Pilihan tidak valid. Silakan coba lagi." << endl;
-            break;
+            case 1: terimaPesanan(); break;
+            case 2: lakukanPembayaran(); break;
+            case 3: updateStatusPesanan(); break;
+            case 4: tampilkanPesananAktif(); break;
+            case 5: terimaKomplain(); break;
+            case 6: tampilkanKomplain(); break;
+            case 7:
+                cout << "Terima kasih telah menggunakan LSMS!" << endl;
+                return 0;
+            default:
+                cout << "Pilihan tidak valid. Silakan coba lagi." << endl;
         }
     }
 }
